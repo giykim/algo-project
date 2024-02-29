@@ -1,3 +1,4 @@
+import pandas as pd
 import refinitiv.data as rd
 import refinitiv.dataplatform as rdp
 
@@ -22,17 +23,36 @@ def connect_refinitiv():
 
 
 def refinitiv_data():
-    pass
+    df = rd.get_data(
+        universe=["PLTR.K"],
+        fields=[
+            "TR.OPENPRICE",
+            "TR.HIGHPRICE",
+            "TR.LOWPRICE",
+            "TR.CLOSEPRICE",
+            "TR.PriceMoVolatilityDly",
+            "TR.CLOSEPRICE.Date"
+        ],
+        parameters={
+            'Curn': 'USD',
+            'SDate': '1D'
+        }
+    )
+
+    return df
 
 
 def main():
     session = connect_refinitiv()
 
-    # refinitiv_df = refinitiv_data()
+    refinitiv_df = refinitiv_data()
+    print(refinitiv_df)
 
     session.close()
 
 
 if __name__ == "__main__":
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
     main()
 
