@@ -1,0 +1,9 @@
+# Ignore credentials file
+# File should look like this:
+# RDP_LOGIN = "ENTER-YOUR-LOGIN-HERE"
+# RDP_PASSWORD = "ENTER-YOUR-PASSWORD-HERE"
+# APP_KEY = "ENTER-YOUR-APP-KEY-HERE"
+credentials.py
+
+# Created by PyCharm
+.idea
