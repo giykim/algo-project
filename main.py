@@ -35,24 +35,46 @@ def refinitiv_data():
         ],
         parameters={
             'Curn': 'USD',
-            'SDate': '1D'
+            'SDate': '-3Y',
+            'EDate': '-1D',
+            'Frq': 'D'
         }
     )
 
     return df
 
+def process_data(df):
+    # Convert the 'TR.CLOSEPRICE.Date' column to datetime format
+    df['Date'] = pd.to_datetime(df['Date'])
+    
+    # Set the date column as the index
+    df.set_index('Date', inplace=True)
+    
+    # Resample the DataFrame to 2-week periods and calculate OHLC
+    ohlc_df = df.resample('2W').agg({
+        'Open Price': 'first',
+        'High Price': 'max',
+        'Low Price': 'min',
+        'Close Price': 'last'
+    }).dropna()
+
+    ohlc_df.index = ohlc_df.index - pd.Timedelta(days=13)
+    return ohlc_df
 
 def main():
     session = connect_refinitiv()
 
     refinitiv_df = refinitiv_data()
-    print(refinitiv_df)
 
+    # Process the DataFrame to get OHLC data for 2-week increments
+    processed_df = process_data(refinitiv_df)
+
+    processed_df.to_csv('refinitivOHLC_2Weeks_3Years.csv')
     session.close()
 
 
 if __name__ == "__main__":
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', None)
+    #pd.set_option('display.max_columns', None)
+    #pd.set_option('display.max_rows', None)
     main()
 
