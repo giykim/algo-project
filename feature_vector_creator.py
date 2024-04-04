@@ -3,9 +3,9 @@ import pandas as pd
 
 def feature_vector():
     # Load the datasets
-    stock_data = pd.read_csv("refinitivOHLC_2Weeks_3Years.csv")
-    acled_data = pd.read_csv("events_over_time.csv")
-    trends_data = pd.read_csv("trends_data.csv")
+    stock_data = pd.read_csv("data/refinitivOHLC_2Weeks_3Years.csv")
+    acled_data = pd.read_csv("data/events_over_time.csv")
+    trends_data = pd.read_csv("data/trends_data.csv")
 
     # Merge the dataframes on the "Date" column
     merged_data = pd.merge(stock_data, acled_data, on="Date", how="left")

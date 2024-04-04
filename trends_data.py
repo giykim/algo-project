@@ -8,10 +8,10 @@ from sklearn.preprocessing import MinMaxScaler
 from serpapi import GoogleSearch
 
 
-json_path = "interest_over_time.json"
+json_path = "data/interest_over_time.json"
 
 def query_google_trends(topics, override=False):
-    if os.path.isfile("interest_over_time.json"):
+    if os.path.isfile("data/interest_over_time.json"):
         if not override:
             print("Google trends JSON already exists")
             return
@@ -87,7 +87,7 @@ def process_trends_json(topics):
         col.append(topic)
     trends_df.columns = col
 
-    csv_path = "trends_data.csv"
+    csv_path = "data/trends_data.csv"
     trends_df.to_csv(csv_path, index=False)
 
     print(f"Saved Google trends JSON to {json_path}")
