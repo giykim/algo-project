@@ -24,7 +24,7 @@ def connect_refinitiv():
 
 def refinitiv_data():
     df = rd.get_data(
-        universe=["PLTR.K"],
+        universe=["LMT"],
         fields=[
             "TR.OPENPRICE",
             "TR.HIGHPRICE",
@@ -35,8 +35,8 @@ def refinitiv_data():
         ],
         parameters={
             'Curn': 'USD',
-            'SDate': '-3Y',
-            'EDate': '-1D',
+            'SDate': '2021-03-29',
+            'EDate': '2024-03-28',
             'Frq': 'D'
         }
     )
@@ -69,7 +69,7 @@ def main():
     # Process the DataFrame to get OHLC data for 2-week increments
     processed_df = process_data(refinitiv_df)
 
-    processed_df.to_csv('refinitivOHLC_2Weeks_3Years.csv')
+    processed_df.to_csv('LMTrefinitivOHLC_2Weeks_3Years.csv')
     session.close()
 
 

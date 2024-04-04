@@ -13,7 +13,7 @@ def fetch_data(page):
     response = requests.get(base_url, params=params)
     return response.text
 
-def get_events_data(pages=100):
+def get_events_data(pages=500):
     all_data = []
     for page in range(1, pages + 1):
         print(page)
