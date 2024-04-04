@@ -8,10 +8,12 @@ from sklearn.preprocessing import MinMaxScaler
 from serpapi import GoogleSearch
 
 
-def get_trends(topics, override=False):
+json_path = "interest_over_time.json"
+
+def query_google_trends(topics, override=False):
     if os.path.isfile("interest_over_time.json"):
         if not override:
-            print("File already exists")
+            print("Google trends JSON already exists")
             return
 
     print("Querying Google Trends")
@@ -39,36 +41,28 @@ def get_trends(topics, override=False):
     results = search.get_dict()
     interest_over_time = results["interest_over_time"]
 
-    with open("interest_over_time.json", "w") as outfile:
+    with open(json_path, "w") as outfile:
         json.dump(interest_over_time, outfile, indent=4)
 
+    print(f"Saved Google trends query to {json_path}")
 
-def load_trends_data(topics):
+
+def process_trends_json(topics):
     try:
-        with open("interest_over_time.json") as infile:
+        with open(json_path) as infile:
+            print(f"Reading interest data JSON")
             json_data = json.load(infile)
     except FileNotFoundError:
-        print("File not found")
+        print("Interest data JSON not found")
     except json.JSONDecodeError as e:
         print("JSON decoding error:", e)
 
     trends_list = []
-    # cur_year = -1
     for data in json_data["timeline_data"]:
         row = []
 
         data_info = data["date"].split("\u2009–\u2009")
 
-        # by start date
-        # if cur_year == -1:
-        #     cur_year = data_info[-1][-4:]
-        # if "," in data_info[0]:
-        #     row.append(data_info[0])
-        # else:
-        #     row.append(f"{data_info[0]}, {cur_year}")
-        # cur_year = data_info[-1][-4:]
-
-        # by end date
         if data_info[1][0].isdigit():
             row.append(f"{data_info[0].split(" ")[0]} {data_info[1]}")
         else:
@@ -85,7 +79,7 @@ def load_trends_data(topics):
     dates = trends_df.iloc[:, 0]
     values = pd.DataFrame(scaler.fit_transform(trends_df.iloc[:, 1:]), columns=trends_df.columns[1:])
     trends_df = pd.concat([dates, values], axis=1)
-    trends_df.iloc[:, 0] = pd.to_datetime(trends_df.iloc[:, 0])
+    trends_df.iloc[:, 0] = pd.to_datetime(trends_df.iloc[:, 0]).dt.date
     trends_df.iloc[:, 0] += timedelta(days=2)
 
     col = ["Date"]
@@ -93,10 +87,16 @@ def load_trends_data(topics):
         col.append(topic)
     trends_df.columns = col
 
-    trends_df.to_csv("trends_data.csv", index=False)
+    csv_path = "trends_data.csv"
+    trends_df.to_csv(csv_path, index=False)
 
-    return json_data
+    print(f"Saved Google trends JSON to {json_path}")
+
+
+def google_trends_data(topics):
+    query_google_trends(topics)
+    process_trends_json(topics)
+
 
 topics = "war,conflict,united states"
-get_trends(topics)
-load_trends_data(topics)
+google_trends_data(topics)
