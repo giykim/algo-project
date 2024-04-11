@@ -20,9 +20,9 @@ def main():
     feature_df = feature_vector()
     feature_df = feature_df.dropna()
     target_df = calc_price_change(feature_df)
-
+    print(feature_df)
     interval_length = 26
-    feature_col = ["Open Price", "war", "conflict", "united states", "Count"]
+    feature_col = ["Open Price", "war", "conflict", "united states", "Count", "FEDFUNDS"]
     warnings.filterwarnings(
         "ignore",
         message="X does not have valid feature names, but LogisticRegression was fitted with feature names"

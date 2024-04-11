@@ -34,7 +34,7 @@ def aggregate_events(data):
 
     # Create a date range
     date_range = [start_date + timedelta(days=x) for x in range((end_date - start_date).days + 1)]
-
+    print(date_range)
     # Count events for each date in the range
     event_counts = []
     for current_date in date_range:
@@ -47,7 +47,7 @@ def main():
     raw_data = get_events_data()
     processed_data = process_data(raw_data)
     events_over_time = aggregate_events(processed_data)
-    np.savetxt("events_over_time500.csv", events_over_time, delimiter=",", fmt='%s', header="Date Event Count", comments='')
+    #np.savetxt("events_over_time500.csv", events_over_time, delimiter=",", fmt='%s', header="Date Event Count", comments='')
 
 
 if __name__ == "__main__":
