@@ -5,6 +5,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
 
 from feature_vector_creator import feature_vector
+from dash_app import dash_app
 
 
 def calc_price_change(df):
@@ -33,6 +34,8 @@ def main():
     n_correct = 0
     n_cases = 0
 
+    orders = []
+
     for i in range(feature_df.shape[0]-interval_length-1):
         start = i
         end = i + interval_length + 1
@@ -54,12 +57,17 @@ def main():
         n_correct += (y_test == y_pred)
         n_cases += 1
 
+        if y_test == y_pred:
+            orders.append(feature_df.iloc[start]["Date"])
+
     print(f"conf matrix:\t{conf_matrix[0]}")
     for i in range(1, n_classes):
         print(f"\t\t{conf_matrix[i]}")
     print(f"accuracy:\t{n_correct / n_cases}")
 
     # TODO: Visualization
+    dash_app(feature_df)
+
     # TODO: Get rid of bad trades
 
 
