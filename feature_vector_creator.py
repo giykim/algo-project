@@ -4,7 +4,7 @@ import pandas as pd
 def feature_vector():
     # Load the datasets
     stock_data = pd.read_csv("data/refinitivOHLC_2Weeks_3Years.csv")
-    acled_data = pd.read_csv("data/events_over_time.csv")
+    acled_data = pd.read_csv("data/events_over_time500.csv")
     trends_data = pd.read_csv("data/trends_data.csv")
     fed_data = pd.read_csv("data/fed_funds_complete.csv")
 

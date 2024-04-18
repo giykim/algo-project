@@ -19,6 +19,7 @@ def calc_price_change(df):
 
 def main():
     feature_df = feature_vector()
+    print(feature_df.columns)
     feature_df = feature_df.dropna()
     target_df = calc_price_change(feature_df)
     print(feature_df)
