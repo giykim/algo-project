@@ -1,6 +1,9 @@
 import requests
 import numpy as np
 from datetime import datetime, timedelta
+import csv
+import pickle
+
 
 def fetch_data(page):
     base_url = "https://api.acleddata.com/acled/read.csv/"
@@ -19,11 +22,19 @@ def get_events_data(pages=500):
         print(page)
         data = fetch_data(page)
         all_data.extend(data.split("\n")[1:-1])  # Skip header and last empty line
+    with open('raw_data.pkl', 'wb') as f:
+        pickle.dump(all_data, f)
     return all_data
 
 def process_data(data_list):
     # Convert to a list of tuples (date, event_count)
     processed_data = [(datetime.strptime(line.split(",")[1], '%Y-%m-%d'), 1) for line in data_list]
+
+    with open('processed_data.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['Date', 'Event Count'])
+        writer.writerows(processed_data)
+
     return processed_data
 
 def aggregate_events(data):
@@ -45,6 +56,7 @@ def aggregate_events(data):
 
 def main():
     raw_data = get_events_data()
+    
     processed_data = process_data(raw_data)
     events_over_time = aggregate_events(processed_data)
     #np.savetxt("events_over_time500.csv", events_over_time, delimiter=",", fmt='%s', header="Date Event Count", comments='')
