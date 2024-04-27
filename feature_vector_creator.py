@@ -1,6 +1,15 @@
 import pandas as pd
 
 
+def calc_price_change(df):
+    target_df = pd.DataFrame()
+    target_df["Date"] = df["Date"]
+    target_df["Long"] = (df["High Price"] - df["Open Price"]) / df["Open Price"] > 0.03
+    target_df["Short"] = (df["Low Price"] - df["Open Price"]) / df["Open Price"] < -0.03
+
+    return target_df
+
+
 def feature_vector():
     # Load the datasets
     stock_data = pd.read_csv("data/refinitivOHLC_2Weeks_3Years.csv")
