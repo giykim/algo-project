@@ -1,8 +1,6 @@
-import numpy as np
 import pandas as pd
 
 from orders import create_blotter, get_orders
-from dash_app import dash_app
 from feature_vector_creator import calc_price_change, feature_vector
 from model import get_predictions
 
@@ -29,10 +27,8 @@ def main():
     daily_df.reset_index(drop=True, inplace=True)
     buy_orders, sell_orders = get_orders(daily_df, predictions, perc_change)
 
-    # TODO: Create blotter
+    # Get and analyze blotter
     blotter_df = create_blotter(buy_orders, sell_orders, first_date, True)
-
-    # TODO: Analyze blotter
 
     # TODO: Get rid of bad trades
 
