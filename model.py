@@ -18,7 +18,6 @@ def get_predictions(feature_df: pandas.DataFrame,
 
     n_classes = 2
     conf_matrix = [[0] * n_classes for _ in range(n_classes)]
-    n_correct = 0
     n_cases = 0
 
     predictions = {}
@@ -33,19 +32,33 @@ def get_predictions(feature_df: pandas.DataFrame,
 
         model = LogisticRegression(random_state=42)
         model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        predictions[feature_df.iloc[end]['Date']] = (y_pred)
+        y_prob = model.predict_proba(X_test)[:, 1]
+
+        threshold = 0.5
+        y_pred = (y_prob > threshold)[0]
+
+        predictions[feature_df.iloc[end]['Date']] = (y_test, y_pred)
 
         y_test = int(y_test)
         y_pred = int(y_pred)
-        conf_matrix[y_test][y_pred] += 1
-        n_correct += (y_test == y_pred)
+        conf_matrix[1-y_test][1-y_pred] += 1
         n_cases += 1
+
+    TP = conf_matrix[0][0]
+    TN = conf_matrix[1][1]
+    FP = conf_matrix[1][0]
+    FN = conf_matrix[0][1]
+
+    accu = (TP + TN) / n_cases
+    precision = TP / (TP + FP) if (TP + FP) > 0 else 0
+    recall = TP / (TP + FN) if (TP + FN) > 0 else 0
+    f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
 
     if print_metrics:
         print(f"conf matrix:\t{conf_matrix[0]}")
         for i in range(1, n_classes):
             print(f"\t\t{conf_matrix[i]}")
-        print(f"accuracy:\t{n_correct / n_cases}")
+        print(f"accuracy:\t{accu}")
+        print(f"f1 score:\t{f1_score}")
 
     return predictions
