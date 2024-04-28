@@ -23,7 +23,7 @@ def connect_refinitiv():
 
 def refinitiv_data():
     df = rd.get_data(
-        universe=["LMT"],
+        universe=["PLTR.K"],
         fields=[
             "TR.OPENPRICE",
             "TR.HIGHPRICE",
@@ -62,7 +62,7 @@ def process_data(df):
 
     ohlc_df.reset_index(inplace=True)
 
-    ohlc_df.to_csv("refinitivOHLC_2Weeks_3Years.csv", index=False)
+    ohlc_df.to_csv("data/refinitiv_palantir_biweekly.csv", index=False)
 
 
 session = connect_refinitiv()
