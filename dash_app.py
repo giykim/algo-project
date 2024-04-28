@@ -16,7 +16,7 @@ class App:
     def run_app(self):
         self.app.layout = html.Div([
             # Main Selector
-            html.H1("Palantir Prices"),
+            html.H1("Palantir Portfolio"),
             dcc.Dropdown(
                 id="Dropdown",
                 options=[
