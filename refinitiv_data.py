@@ -43,6 +43,27 @@ def refinitiv_data():
     return df
 
 
+def spx_data():
+    spx = rd.get_data(
+        universe=['.SPX'],
+        fields=[
+            'TR.PriceClose',
+            'TR.PriceClose.date',
+        ],
+        parameters={
+            'SDate': '2021-03-29',
+            'EDate': '2024-03-28',
+            'Frq': 'D',
+            'Curn': 'USD'
+        }
+    )
+
+    spx["Date"] = pd.to_datetime(spx["Date"])
+    spx.set_index('Date', inplace=True)
+    spx.reset_index(inplace=True)
+    spx.to_csv("data/spx_daily.csv", index=False)
+
+
 def process_data(df):
     # Convert the 'TR.CLOSEPRICE.Date' column to datetime format
     df['Date'] = pd.to_datetime(df['Date'])
@@ -66,8 +87,10 @@ def process_data(df):
 
 
 session = connect_refinitiv()
-refinitiv_df = refinitiv_data()
-session.close()
+# refinitiv_df = refinitiv_data()
+# session.close()
 
 # Process the DataFrame to get OHLC data for 2-week increments
-process_data(refinitiv_df)
+# process_data(refinitiv_df)
+
+# spx_data()
