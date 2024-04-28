@@ -65,10 +65,10 @@ def get_predictions(feature_df: pandas.DataFrame,
     f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
 
     if print_metrics:
-        print(f"conf matrix:\t{conf_matrix[0]}")
+        print(f"Confusion Matrix:\t{conf_matrix[0]}")
         for i in range(1, n_classes):
-            print(f"\t\t{conf_matrix[i]}")
-        print(f"accuracy:\t{accu}")
-        print(f"f1 score:\t{f1_score}")
+            print(f"\t\t\t{conf_matrix[i]}")
+        print(f"Accuracy:\t{accu}")
+        print(f"F1-Score:\t{f1_score}")
 
     return predictions
