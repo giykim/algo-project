@@ -3,13 +3,14 @@ import warnings
 import pandas
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
 
 
 def get_predictions(feature_df: pandas.DataFrame,
                     target_df: pandas.DataFrame,
                     feature_col: list[str],
                     interval_length: int,
-                    print_metrics: bool = True,
+                    print_metrics: bool = False,
                     ) -> dict:
     warnings.filterwarnings(
         "ignore",
@@ -19,6 +20,15 @@ def get_predictions(feature_df: pandas.DataFrame,
     n_classes = 2
     conf_matrix = [[0] * n_classes for _ in range(n_classes)]
     n_cases = 0
+
+    columns_to_exclude = ["Date"]
+    columns_to_scale = feature_df.columns.difference(columns_to_exclude)
+
+    scaler = StandardScaler()
+    scaled_features = scaler.fit_transform(feature_df[columns_to_scale])
+
+    scaled_df = pd.DataFrame(scaled_features, columns=columns_to_scale, index=feature_df.index)
+    feature_df = pd.concat([feature_df[columns_to_exclude], scaled_df], axis=1)
 
     predictions = {}
     for i in range(feature_df.shape[0] - interval_length - 1):
