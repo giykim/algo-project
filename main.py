@@ -1,8 +1,9 @@
 import pandas as pd
 
-from orders import create_blotter, get_orders
+from dash_app import App
 from feature_vector_creator import calc_price_change, feature_vector
 from model import get_predictions
+from orders import create_blotter, get_orders
 
 
 def main():
@@ -17,7 +18,7 @@ def main():
     first_date = feature_df.iloc[interval_length + 1]["Date"]
     print(f"Starting at {first_date}")
     feature_col = ["Open Price", "war", "conflict", "united states", "Count", "FEDFUNDS"]
-    predictions = get_predictions(feature_df, target_df, feature_col, interval_length, True)
+    pred, pred_stats = get_predictions(feature_df, target_df, feature_col, interval_length, True)
 
     # Get buy and sell orders based on predictions
     daily_df = pd.read_csv("data/refinitiv_palantir_daily.csv")
@@ -25,15 +26,16 @@ def main():
     first_idx = daily_df[daily_df["Date"] == first_date].index[0]
     daily_df = daily_df.iloc[first_idx:]
     daily_df.reset_index(drop=True, inplace=True)
-    buy_orders, sell_orders = get_orders(daily_df, predictions, perc_change)
+    buy_orders, sell_orders = get_orders(daily_df, pred, perc_change)
 
     # Get and analyze blotter
-    blotter_df = create_blotter(buy_orders, sell_orders, first_date, True)
+    blotter_df, blotter_stats = create_blotter(buy_orders, sell_orders, first_date, True)
 
     # TODO: Get rid of bad trades
 
     # Visualization
-    # dash_app(daily_df, buy_orders, sell_orders)
+    app = App(daily_df, blotter_df, blotter_stats)
+    app.run_app()
 
 
 if __name__ == "__main__":

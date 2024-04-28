@@ -11,7 +11,7 @@ def get_predictions(feature_df: pandas.DataFrame,
                     feature_col: list[str],
                     interval_length: int,
                     print_metrics: bool = False,
-                    ) -> dict:
+                    ):
     warnings.filterwarnings(
         "ignore",
         message="X does not have valid feature names, but LogisticRegression was fitted with feature names"
@@ -71,4 +71,11 @@ def get_predictions(feature_df: pandas.DataFrame,
         print(f"Accuracy:\t{accu}")
         print(f"F1-Score:\t{f1_score}")
 
-    return predictions
+    stats = {}
+    stats["accu"] = accu
+    stats["precision"] = precision
+    stats["recall"] = recall
+    stats["f1_score"] = f1_score
+    stats["confusion_matrix"] = conf_matrix
+
+    return predictions, stats

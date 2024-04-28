@@ -17,6 +17,8 @@ def create_blotter(buy_orders: list,
                                        "EntryPrice",
                                        "ExitPrice",
                                        ])
+    stats = {}
+
     for i in range(len(buy_orders)):
         row = {"Identifier": "PLTR.K",
                "EntryTimestamp": buy_orders[i][0],
@@ -47,11 +49,13 @@ def create_blotter(buy_orders: list,
         expected_returns[name] = np.prod(1 + identifier["DailyReturn"]) ** (1 / len(identifier)) - 1
         weights[name] = np.sum(identifier["Value"]) / portfolio_value
     expected_portfolio_returns = np.sum([x * y for x, y in zip(weights.values(), expected_returns.values())])
+    stats["ExpectedReturns"] = expected_portfolio_returns
     if print_stats:
         print(f"Strategy's Expected Returns: {round(100 * expected_portfolio_returns, 4)}%")
 
     # Volatility
     portfolio_volatility = np.std(matched_df["DailyReturn"])
+    stats["Volatility"] = portfolio_volatility
     if print_stats:
         print(f"Strategy's Volatility: {round(portfolio_volatility, 4)}")
 
@@ -64,6 +68,7 @@ def create_blotter(buy_orders: list,
 
     # Sharpe Ratio
     sharpe = (expected_portfolio_returns - risk_free_rate) / portfolio_volatility
+    stats["Sharpe"] = sharpe
     if print_stats:
         print(f"Strategy's Sharpe Ratio: {round(sharpe, 4)}")
 
@@ -85,7 +90,6 @@ def create_blotter(buy_orders: list,
 
     blotter_df = pd.merge(blotter_df, spx, left_on="ExitTimestamp", right_on="Date", how="left")
     num_days = (blotter_df.iloc[-1]["Date"] - blotter_df.iloc[0]["Date"]).days
-    blotter_df.drop(["Date", "Instrument", "Price Close", "SPXReturn", "SPXDays"], axis=1, inplace=True)
 
     lin_reg = LinearRegression()
     matched_df = blotter_df[pd.notna(blotter_df["DailyReturn"])]
@@ -95,6 +99,8 @@ def create_blotter(buy_orders: list,
     lin_reg.fit(X, y)
     alpha = lin_reg.intercept_
     beta = lin_reg.coef_[0]
+    stats["Alpha"] = alpha
+    stats["Beta"] = beta
     print(f"Alpha: {round(alpha, 4)}")
     print(f"Beta: {round(beta, 4)}")
 
@@ -103,9 +109,21 @@ def create_blotter(buy_orders: list,
     expected_sml_return = risk_free_rate + beta * (expected_market_return - risk_free_rate)
 
     distance = abs(expected_portfolio_returns - expected_sml_return)
+    stats["DistanceSML"] = distance
     print(f"Distance Between Strategy and Security Market Line: {round(distance, 4)}")
 
-    return blotter_df
+    blotter_df.drop(["Date",
+                     "Instrument",
+                     "TradeQuantity",
+                     "Price",
+                     "Price Close",
+                     "SPXReturn",
+                     "SPXDays",
+                     "SPXDailyReturn",
+                     ],
+                    axis=1, inplace=True)
+
+    return blotter_df, stats
 
 def get_orders(df: pd.DataFrame, predictions: dict, perc_change: float):
     buy_orders = []
