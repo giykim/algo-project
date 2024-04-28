@@ -21,7 +21,7 @@ def dash_app(data, buy_orders, sell_orders):
             x=buy_timestamps,
             y=buy_prices,
             mode="markers",
-            marker=dict(symbol="x", color="blue", size=5),
+            marker=dict(symbol="x", color="black", size=5),
             name="Buy Orders"
         )
     )
@@ -31,7 +31,7 @@ def dash_app(data, buy_orders, sell_orders):
             x=sell_timestamps,
             y=sell_prices,
             mode="markers",
-            marker=dict(symbol="circle", color="red", size=5),
+            marker=dict(symbol="circle", color="black", size=5),
             name="Sell Orders"
         )
     )
