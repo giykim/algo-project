@@ -1,11 +1,11 @@
 import pandas as pd
 
 
-def calc_price_change(df):
+def calc_price_change(df: pd.DataFrame, perc_change: float) -> pd.DataFrame:
     target_df = pd.DataFrame()
     target_df["Date"] = df["Date"]
-    target_df["Long"] = (df["High Price"] - df["Open Price"]) / df["Open Price"] > 0.03
-    target_df["Short"] = (df["Low Price"] - df["Open Price"]) / df["Open Price"] < -0.03
+    target_df["Long"] = (df["High Price"] - df["Open Price"]) / df["Open Price"] > perc_change
+    target_df["Short"] = (df["Low Price"] - df["Open Price"]) / df["Open Price"] < -perc_change
 
     return target_df
 

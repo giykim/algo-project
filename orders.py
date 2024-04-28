@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta
 
-import pandas
+import numpy as np
+import pandas as pd
 
 
-def create_blotter()
-
-def get_orders(df: pandas.DataFrame, predictions: dict, perc_change: float):
+def get_orders(df: pd.DataFrame, predictions: dict, perc_change: float):
     buy_orders = []
     sell_orders = []
 
