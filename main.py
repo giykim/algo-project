@@ -30,12 +30,7 @@ def main():
 
     # Get and analyze blotter
     blotter_df, blotter_stats = create_blotter(buy_orders, sell_orders, first_date, True)
-
-    # TODO: Get rid of bad trades
-    badTradesDf = blotter_df.copy()
-    badTradesDf['badTrade'] = (badTradesDf['DailyReturn'] <= -0.01).astype(int)
-
-    
+   
     # Visualization
     app = App(daily_df, blotter_df, blotter_stats)
     app.run_app()
