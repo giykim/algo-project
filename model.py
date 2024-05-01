@@ -11,6 +11,7 @@ def get_predictions(feature_df: pandas.DataFrame,
                     feature_col: list[str],
                     interval_length: int,
                     print_metrics: bool = False,
+                    use_bad_trades_model: bool = False
                     ):
     warnings.filterwarnings(
         "ignore",
@@ -18,7 +19,8 @@ def get_predictions(feature_df: pandas.DataFrame,
     )
 
     n_classes = 2
-    conf_matrix = [[0] * n_classes for _ in range(n_classes)]
+    conf_matrix_long = [[0] * n_classes for _ in range(n_classes)]
+    conf_matrix_badTrade = [[0] * n_classes for _ in range(n_classes)]
     n_cases = 0
 
     columns_to_exclude = ["Date"]
@@ -37,45 +39,58 @@ def get_predictions(feature_df: pandas.DataFrame,
 
         X_train = feature_df.iloc[start:end][feature_col]
         X_test = feature_df.iloc[end][feature_col].values.reshape(1, -1)
-        y_train = target_df.iloc[start:end]["Long"]
-        y_test = target_df.iloc[end]["Long"]
+        y_train_long = target_df.iloc[start:end]["Long"]
+        y_test_long = target_df.iloc[end]["Long"]
 
-        model = LogisticRegression(random_state=42)
-        model.fit(X_train, y_train)
-        y_prob = model.predict_proba(X_test)[:, 1]
+        # Model for predicting 'long'
+        model_long = LogisticRegression(random_state=42)
+        model_long.fit(X_train, y_train_long)
+        y_pred_long = (model_long.predict_proba(X_test)[:, 1] > 0.5)[0]
 
-        threshold = 0.5
-        y_pred = (y_prob > threshold)[0]
+        final_pred = y_pred_long  # default to the prediction of the 'long' model
 
-        predictions[feature_df.iloc[end]['Date']] = (y_test, y_pred)
+        if use_bad_trades_model and "badTrade" in target_df.columns:
+            y_train_badTrade = target_df.iloc[start:end]["badTrade"]
+            if y_train_badTrade.sum() > 0:  # Check if there are any bad trades in the training data
+                # Model for predicting 'badTrade'
+                model_badTrade = LogisticRegression(random_state=42)
+                model_badTrade.fit(X_train, y_train_badTrade)
+                y_pred_badTrade = (model_badTrade.predict_proba(X_test)[:, 1] > 0.5)[0]
 
-        y_test = int(y_test)
-        y_pred = int(y_pred)
-        conf_matrix[1-y_test][1-y_pred] += 1
+                # Combine predictions: only count as '1' if long is '1' and badTrade is '0'
+                final_pred = int(y_pred_long and not y_pred_badTrade)
+
+        predictions[feature_df.iloc[end]['Date']] = (y_test_long, final_pred)
+
+        # Update confusion matrix for 'long'
+        y_test_long = int(y_test_long)
+        conf_matrix_long[1-y_test_long][1-int(final_pred)] += 1
         n_cases += 1
 
-    TP = conf_matrix[0][0]
-    TN = conf_matrix[1][1]
-    FP = conf_matrix[1][0]
-    FN = conf_matrix[0][1]
+    # Calculate and print metrics for 'long'
+    def calculate_metrics(conf_matrix):
+        TP = conf_matrix[0][0]
+        TN = conf_matrix[1][1]
+        FP = conf_matrix[1][0]
+        FN = conf_matrix[0][1]
+        accu = (TP + TN) / n_cases
+        precision = TP / (TP + FP) if (TP + FP) > 0 else 0
+        recall = TP / (TP + FN) if (TP + FN) > 0 else 0
+        f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+        return {
+            "accuracy": accu,
+            "precision": precision,
+            "recall": recall,
+            "f1_score": f1_score,
+            "confusion_matrix": conf_matrix
+        }
 
-    accu = (TP + TN) / n_cases
-    precision = TP / (TP + FP) if (TP + FP) > 0 else 0
-    recall = TP / (TP + FN) if (TP + FN) > 0 else 0
-    f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    stats_long = calculate_metrics(conf_matrix_long)
 
     if print_metrics:
-        print(f"Confusion Matrix:\t{conf_matrix[0]}")
-        for i in range(1, n_classes):
-            print(f"\t\t\t{conf_matrix[i]}")
-        print(f"Accuracy:\t{accu}")
-        print(f"F1-Score:\t{f1_score}")
+        print(f"Metrics for 'long':")
+        print(f"Accuracy: {stats_long['accuracy']}")
+        print(f"F1-Score: {stats_long['f1_score']}")
+        print(f"Confusion Matrix: {stats_long['confusion_matrix']}")
 
-    stats = {}
-    stats["accu"] = accu
-    stats["precision"] = precision
-    stats["recall"] = recall
-    stats["f1_score"] = f1_score
-    stats["confusion_matrix"] = conf_matrix
-
-    return predictions, stats
+    return predictions, stats_long

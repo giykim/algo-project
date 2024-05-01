@@ -6,7 +6,7 @@ def calc_price_change(df: pd.DataFrame, perc_change: float) -> pd.DataFrame:
     target_df["Date"] = df["Date"]
     target_df["Long"] = (df["High Price"] - df["Open Price"]) / df["Open Price"] > perc_change
     target_df["Short"] = (df["Low Price"] - df["Open Price"]) / df["Open Price"] < -perc_change
-
+    target_df["badTrade"] = (df["Low Price"] - df["Open Price"]) / df["Open Price"] < -.12
     return target_df
 
 
